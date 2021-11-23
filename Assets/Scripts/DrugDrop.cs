@@ -1,13 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
-    [SerializeField] private RectTransform rectTransform;
-    [SerializeField] private Vector2 startTransform;
-    [SerializeField] private Vector2 endTransform;
+    #region private variables
+
+    private RectTransform rectTransform;
+    private Vector2 startTransform;
+    private Vector2 endTransform;
+    private bool callbackOnDoublejump;
+    private Movement movement;
+    private UnityAction actionOnStartDrug;
+    private UnityAction actionOnEndDrug;
+    private UnityAction actionOnDraging;
+    private bool drugStarted;
+
+    #endregion private variables
+
+    #region Unity functions
 
     private void OnValidate()
     {
@@ -19,9 +32,25 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 
     private void Start()
     {
+        if (movement == null)
+        {
+            movement = FindObjectOfType<Movement>();
+        }
         startTransform = rectTransform.anchoredPosition;
         endTransform = Vector2.zero;
     }
+
+    private void FixedUpdate()
+    {
+        if (drugStarted)
+        {
+            actionOnDraging?.Invoke();
+        }
+    }
+
+    #endregion Unity functions
+
+    #region public functions
 
     public Vector2 GetStartPosition()
     {
@@ -43,14 +72,60 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
             return Vector2.zero;
     }
 
+    public bool GetCallback()
+    {
+        return callbackOnDoublejump;
+    }
+
+    public void SetActionToStartDrug(UnityAction action)
+    {
+        actionOnStartDrug += action;
+    }
+
+    public void SetActionToEndDrug(UnityAction action)
+    {
+        actionOnEndDrug += action;
+    }
+
+    public void SetActionToDragging(UnityAction action)
+    {
+        actionOnDraging += action;
+    }
+
+    #endregion public functions
+
+    #region private functions
+
+    private IEnumerator Dragging()
+    {
+        actionOnDraging?.Invoke();
+        yield return new WaitForFixedUpdate();
+    }
+
+    #endregion private functions
+
+    #region Interface realize
+
     void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
     {
         Debug.Log("OnPointDown");
+        if (eventData.clickCount == 2)
+        {
+            callbackOnDoublejump = true;
+            Debug.Log("double click");
+        }
+        else
+        {
+            callbackOnDoublejump = false;
+        }
+        actionOnDraging?.Invoke();
     }
 
     void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
     {
         Debug.Log("OnBeginDrug");
+        actionOnStartDrug?.Invoke();
+        drugStarted = true;
     }
 
     void IDragHandler.OnDrag(PointerEventData eventData)
@@ -65,5 +140,9 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         Debug.Log("OnEndDrug");
         endTransform = rectTransform.anchoredPosition;
         rectTransform.anchoredPosition = startTransform;
+        actionOnEndDrug?.Invoke();
+        drugStarted = false;
     }
+
+    #endregion Interface realize
 }
