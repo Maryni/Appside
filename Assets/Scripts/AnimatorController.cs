@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class AnimatorController : MonoBehaviour
 {
@@ -42,6 +40,7 @@ public class AnimatorController : MonoBehaviour
             value = false;
         }
         animator.SetBool("isWalking", value);
+        Debug.Log("I'm clicked");
     }
 
     #endregion public funtions

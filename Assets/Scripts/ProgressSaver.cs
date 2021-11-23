@@ -8,17 +8,18 @@ public class ProgressSaver : MonoBehaviour
 {
     #region Inspector variables
 
-    [SerializeField] private int score;
     [SerializeField] private Text textLevel;
     [SerializeField] private Text countObjectDestroyable;
     [SerializeField] private Text countObjectWasDestroyed;
     [SerializeField] private GameObject panelNextLevel;
+    [SerializeField] private GameObject panelToPlay;
 
     #endregion Inspector variables
 
     #region private variables
 
-    private List<int> levels = new List<int>() { 0, 1, 2 };
+    private List<int> levels = new List<int>();
+    private List<int> tempLevels = new List<int>();
     private int lastLevel;
     private bool standartLevelLoading = true;
 
@@ -26,14 +27,10 @@ public class ProgressSaver : MonoBehaviour
 
     #region Unity functions
 
-    private void Awake()
-    {
-        DontDestroyOnLoad(this.gameObject);
-    }
-
     private void Start()
     {
         lastLevel = SceneManager.GetActiveScene().buildIndex;
+        SetValueToListSceneIndex();
         SetStartValues();
     }
 
@@ -41,35 +38,29 @@ public class ProgressSaver : MonoBehaviour
 
     #region public functions
 
+    [ContextMenu("LoadNext Level")] //used for tests
     public void LoadNextLevel()
     {
         AddLevel();
         if (standartLevelLoading)
         {
-            if (lastLevel == 0 || lastLevel == 1)
+            if (lastLevel == 1)
             {
-                SceneManager.LoadSceneAsync(lastLevel++);
-            }
-            if (SceneManager.GetActiveScene().buildIndex == 2)
-            {
-                standartLevelLoading = false;
+                SceneManager.LoadScene(lastLevel + 1);
             }
         }
         else
         {
-            List<int> temp = levels;
-            temp.Remove(lastLevel);
-            SceneManager.LoadSceneAsync(temp[Random.Range(0, temp.Count)]);
+            SetLevelsToTempLevels();
+            tempLevels.RemoveAt(lastLevel - 1);
+            SceneManager.LoadScene(tempLevels[Random.Range(0, tempLevels.Count)]);
         }
-        lastLevel = SceneManager.GetActiveScene().buildIndex;
         panelNextLevel.SetActive(false);
     }
 
     public void AddLevel()
     {
-        int level = int.Parse(textLevel.text);
-        level++;
-        textLevel.text = level.ToString();
+        textLevel.text = (int.Parse(textLevel.text) + 1).ToString();
     }
 
     public void CheckProgression()
@@ -90,6 +81,21 @@ public class ProgressSaver : MonoBehaviour
         countObjectDestroyable.text = count.ToString();
     }
 
+    public void SetLastLevelAfterLoadNextLevel()
+    {
+        lastLevel = SceneManager.GetActiveScene().buildIndex;
+        if (SceneManager.GetActiveScene().buildIndex == 2)
+        {
+            standartLevelLoading = false;
+            print("standartLevelLoading = false");
+        }
+    }
+
+    public void OpenStartPanelOnLoadLevel()
+    {
+        panelToPlay.SetActive(true);
+    }
+
     #endregion public functions
 
     #region private functions
@@ -102,6 +108,25 @@ public class ProgressSaver : MonoBehaviour
     private void SetStartLevel()
     {
         textLevel.text = "1";
+    }
+
+    private void SetValueToListSceneIndex()
+    {
+        var temp = SceneManager.sceneCountInBuildSettings;
+        for (int i = 0; i < temp; i++)
+        {
+            levels.Add(i);
+        }
+        levels.RemoveAt(0); // remove "boot" level
+    }
+
+    private void SetLevelsToTempLevels()
+    {
+        tempLevels = new List<int>();
+        for (int i = 0; i < levels.Count; i++)
+        {
+            tempLevels.Add(levels[i]);
+        }
     }
 
     #endregion private functions

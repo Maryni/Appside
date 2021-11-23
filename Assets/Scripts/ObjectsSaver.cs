@@ -6,8 +6,8 @@ public class ObjectsSaver : MonoBehaviour
 {
     #region Inspector variables
 
-    [SerializeField] private List<GameObject> destroyableObjects;
-    [SerializeField] private List<GameObject> allObjects; //include objects which was been hide ("destroyed")
+    [SerializeField] private List<GameObject> destroyableObjects = new List<GameObject>();
+    [SerializeField] private List<GameObject> allObjects = new List<GameObject>(); //include objects which was been hide ("destroyed")
     private BoxCollider[] temp;
 
     #endregion Inspector variables

@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Animations;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
     #region Inspector variables
 
+#pragma warning disable
     [SerializeField] private float modSpeed;
+#pragma warning restore
 
     #endregion Inspector variables
 

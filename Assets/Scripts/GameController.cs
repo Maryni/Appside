@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -15,12 +14,30 @@ public class GameController : MonoBehaviour
     private ProgressSaver progresSaver;
     private DrugDrop drugDrop;
     private int countObjectsPlayerDestroy = 0;
+    private bool setActions = false;
 
     #endregion private variables
 
     #region Unity functions
 
     private void Start()
+    {
+        SceneManager.sceneLoaded += (Scene scene, LoadSceneMode scenemode) => OnLoadCallback(scene, scenemode);
+    }
+
+    private void OnLoadCallback(Scene scene, LoadSceneMode sceneMode)
+    {
+        SetAllActionsWhenLevelLoaded();
+        progresSaver.OpenStartPanelOnLoadLevel();
+        progresSaver.SetLastLevelAfterLoadNextLevel();
+        Debug.Log($"I'm load in scene {SceneManager.GetActiveScene().buildIndex}");
+    }
+
+    #endregion Unity functions
+
+    #region private functions
+
+    private void SetAllActionsWhenLevelLoaded()
     {
         if (movement == null)
         {
@@ -33,10 +50,6 @@ public class GameController : MonoBehaviour
         if (animatorController == null)
         {
             animatorController = GetComponent<AnimatorController>();
-        }
-        if (objectsSaver == null)
-        {
-            objectsSaver = FindObjectOfType<ObjectsSaver>();
         }
         if (collisionChecker == null)
         {
@@ -55,28 +68,37 @@ public class GameController : MonoBehaviour
         {
             progresSaver = GetComponent<ProgressSaver>();
         }
-
-        SetActionsToObjects();
         SetStartValues();
+
+        if (SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            SetActionsToObjects();
+        }
     }
-
-    #endregion Unity functions
-
-    #region private functions
 
     private void SetActionsToObjects()
     {
-        drugDrop.SetActionToStartDrug(() => animatorController.ChangeAnimatorState());
-        drugDrop.SetActionToEndDrug(() => animatorController.ChangeAnimatorState());
-        drugDrop.SetActionToDragging(() => movement.Move());
-        collisionChecker.SetActionToOnCollisionEvent(() => particles.SetActive(true));
-        collisionChecker.SetActionToOnCollisionEvent(() => countObjectsPlayerDestroy++);
-        collisionChecker.SetActionToOnCollisionEvent(() => progresSaver.SetAllCountObjectsInUI(countObjectsPlayerDestroy));
-        collisionChecker.SetActionToOnCollisionEvent(() => progresSaver.CheckProgression());
+        if (!setActions)
+        {
+            drugDrop.SetActionToStartDrug(() => animatorController.ChangeAnimatorState());
+            drugDrop.SetActionToEndDrug(() => animatorController.ChangeAnimatorState());
+            drugDrop.SetActionToDragging(() => movement.Move());
+            collisionChecker.SetActionToOnCollisionEvent(() => particles.SetActive(true));
+            collisionChecker.SetActionToOnCollisionEvent(() => countObjectsPlayerDestroy++);
+            collisionChecker.SetActionToOnCollisionEvent(() => progresSaver.SetAllCountObjectsInUI(countObjectsPlayerDestroy));
+            collisionChecker.SetActionToOnCollisionEvent(() => progresSaver.CheckProgression());
+            collisionChecker.SetActionToOnCollisionEvent(() => objectsSaver.CheckObjects());//not a best optimize choice
+            setActions = true;
+        }
     }
 
     private void SetStartValues()
     {
+        if (objectsSaver == null)
+        {
+            objectsSaver = FindObjectOfType<ObjectsSaver>();
+        }
+        countObjectsPlayerDestroy = 0;
         progresSaver.SetDestroyableCountInUI(objectsSaver.GetCountAllObjects());
         progresSaver.SetAllCountObjectsInUI(countObjectsPlayerDestroy);
     }
@@ -85,7 +107,7 @@ public class GameController : MonoBehaviour
 
     #region public functions
 
-    public void LoadNextLevel()
+    public void LoadNextLevel() // used in UI
     {
         progresSaver.LoadNextLevel();
     }
