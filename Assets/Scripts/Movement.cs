@@ -55,7 +55,7 @@ public class Movement : MonoBehaviour
     public void Move()
     {
         GetPosition();
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) || Input.touchCount > 0)
         {
             direction = new Vector3(endPos.x - startPos.x, 0, endPos.y - startPos.y).normalized;
             RotateOnDirection();
@@ -89,7 +89,7 @@ public class Movement : MonoBehaviour
         rig.AddForce(Vector3.up * 20f, ForceMode.Impulse);
         if (inJump)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Input.touchCount == 2)
             {
                 rig.AddForce(Vector3.down * 4f, ForceMode.Impulse);
                 inJump = false;
