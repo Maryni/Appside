@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Movement : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class Movement : MonoBehaviour
 
 #pragma warning disable
     [SerializeField] private float modSpeed;
+    [SerializeField] private Text text;
 #pragma warning restore
 
     #endregion Inspector variables
@@ -37,34 +39,40 @@ public class Movement : MonoBehaviour
         {
             rig = player.GetComponent<Rigidbody>();
         }
-        if (drugDrop == null)
-        {
-            drugDrop = FindObjectOfType<DrugDrop>();
-        }
-    }
-
-    private void Start()
-    {
-        startPos = drugDrop.GetStartPosition();
     }
 
     #endregion Unity functions
 
     #region public functions
 
+    public void SetDrugDrop(DrugDrop drugDrop)
+    {
+        this.drugDrop = drugDrop;
+        startPos = drugDrop.GetStartPosition();
+    }
+
     public void Move()
     {
-        GetPosition();
-        if (Input.GetMouseButton(0) || Input.touchCount > 0)
+        if (drugDrop != null)
         {
-            direction = new Vector3(endPos.x - startPos.x, 0, endPos.y - startPos.y).normalized;
-            RotateOnDirection();
-            rig.velocity = direction * modSpeed;
-            direction = Vector2.zero;
-            if (drugDrop.GetCallback())
+            //text.text = "" + startPos + "|" + endPos;
+            GetPosition();
+            if (Input.GetMouseButton(0) || Input.touchCount > 0)
             {
-                Jump();
+                direction = new Vector3(endPos.x - startPos.x, 0, endPos.y - startPos.y).normalized;
+                //text.text = "" + startPos + "|" + endPos;
+                RotateOnDirection();
+                rig.velocity = direction * modSpeed;
+                direction = Vector2.zero;
+                if (drugDrop.GetCallback())
+                {
+                    Jump();
+                }
             }
+        }
+        else
+        {
+            Debug.LogError("DrugDrop = null");
         }
     }
 

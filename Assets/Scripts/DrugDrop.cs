@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
     #region Inspectora variables
 
     [SerializeField] private Canvas canvas;
+    [SerializeField] private Text text;
 
     #endregion Inspectora variables
 
@@ -18,7 +20,6 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
     private Vector2 startTransform;
     private Vector2 endTransform;
     private bool callbackOnDoublejump;
-    private Movement movement;
     private UnityAction actionOnStartDrug;
     private UnityAction actionOnEndDrug;
     private UnityAction actionOnDraging;
@@ -38,16 +39,13 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 
     private void Start()
     {
-        if (movement == null)
-        {
-            movement = FindObjectOfType<Movement>();
-        }
         startTransform = rectTransform.anchoredPosition;
         endTransform = Vector2.zero;
     }
 
     private void FixedUpdate()
-    {
+    { 
+        //Cursor.lockState = CursorLockMode.None;
         if (drugStarted)
         {
             actionOnDraging?.Invoke();
@@ -133,6 +131,14 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         rectTransform.anchoredPosition = startTransform;
         actionOnEndDrug?.Invoke();
         drugStarted = false;
+        text.text = rectTransform.anchoredPosition.ToString();
+    }
+
+    public void OnBeginDragFunction()
+    {
+        drugStarted = true;
+        actionOnStartDrug?.Invoke();
+        text.text = rectTransform.anchoredPosition.ToString();
     }
 
     public void OnDragFunction()
@@ -143,28 +149,29 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
-            rectTransform.anchoredPosition += touch.deltaPosition;
+            if (!(Camera.main is null))
+            {
+                Vector2 touchPos = Camera.main.ScreenToWorldPoint(touch.position);
+                rectTransform.anchoredPosition += touchPos;
+            }
         }
 
         endTransform = rectTransform.anchoredPosition;
+        text.text = rectTransform.anchoredPosition.ToString();
     }
 
     public void OnDragFunction(PointerEventData eventData)
     {
         rectTransform.anchoredPosition += eventData.delta;
         endTransform = rectTransform.anchoredPosition;
+        text.text = eventData.delta.ToString();
     }
 
     public void OnDragFunction(Vector2 pos)
     {
         rectTransform.anchoredPosition += pos;
         endTransform = rectTransform.anchoredPosition;
-    }
-
-    public void OnBeginDragFunction()
-    {
-        drugStarted = true;
-        actionOnStartDrug?.Invoke();
+        text.text = rectTransform.anchoredPosition.ToString();
     }
 
     #endregion public functions
@@ -181,6 +188,17 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 
     #region Interface realize
 
+    // private void OnMouseDrag()
+    // {
+    //     if (Input.touchCount > 0)
+    //     {
+    //         Touch touch = Input.GetTouch(0);
+    //         Vector2 touchPos = Camera.main.ScreenToWorldPoint(touch.position);
+    //         OnDragFunction(touchPos);
+    //     }
+    //     text.text = rectTransform.anchoredPosition.ToString();
+    // }
+
     void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
     {
         Debug.Log("OnPointDown");
@@ -193,6 +211,7 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         {
             callbackOnDoublejump = false;
         }
+        text.text = rectTransform.anchoredPosition.ToString();
     }
 
     void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)

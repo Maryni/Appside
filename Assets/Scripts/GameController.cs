@@ -3,16 +3,21 @@ using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
+    #region Inspector variables
+
+    [SerializeField] private GameObject player;
+    [SerializeField] private DrugDrop drugDrop;
+
+    #endregion Inspector variables
+
     #region private variables
 
-    private GameObject player;
     private GameObject particles;
     private Movement movement;
     private AnimatorController animatorController;
     private ObjectsSaver objectsSaver;
     private CollisionChecker collisionChecker;
     private ProgressSaver progresSaver;
-    private DrugDrop drugDrop;
     private int countObjectsPlayerDestroy = 0;
     private bool setActions = false;
 
@@ -41,11 +46,7 @@ public class GameController : MonoBehaviour
     {
         if (movement == null)
         {
-            movement = FindObjectOfType<Movement>();
-        }
-        if (player == null)
-        {
-            player = movement.gameObject;
+            movement = player.GetComponent<Movement>();
         }
         if (animatorController == null)
         {
@@ -53,15 +54,11 @@ public class GameController : MonoBehaviour
         }
         if (collisionChecker == null)
         {
-            collisionChecker = FindObjectOfType<CollisionChecker>();
-        }
-        if (drugDrop == null)
-        {
-            drugDrop = FindObjectOfType<DrugDrop>();
+            collisionChecker = player.GetComponent<CollisionChecker>();
         }
         if (particles == null)
         {
-            particles = FindObjectOfType<ParticleSystem>().gameObject;
+            particles = player.GetComponentInChildren<ParticleSystem>().gameObject;
             particles.SetActive(false);
         }
         if (progresSaver == null)
@@ -101,6 +98,7 @@ public class GameController : MonoBehaviour
         countObjectsPlayerDestroy = 0;
         progresSaver.SetDestroyableCountInUI(objectsSaver.GetCountAllObjects());
         progresSaver.SetAllCountObjectsInUI(countObjectsPlayerDestroy);
+        movement.SetDrugDrop(drugDrop);
     }
 
     #endregion private functions
