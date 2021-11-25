@@ -9,14 +9,13 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 {
     #region Inspectora variables
 
-    [SerializeField] private Canvas canvas;
-    [SerializeField] private Text text;
-
+    [SerializeField] private RectTransform rectTransform;
+    
     #endregion Inspectora variables
 
     #region private variables
 
-    private RectTransform rectTransform;
+    
     private Vector2 startTransform;
     private Vector2 endTransform;
     private bool callbackOnDoublejump;
@@ -29,55 +28,24 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
 
     #region Unity functions
 
-    private void OnValidate()
+    private void Start()
     {
         if (rectTransform == null)
         {
             rectTransform = GetComponent<RectTransform>();
         }
-    }
-
-    private void Start()
-    {
         startTransform = rectTransform.anchoredPosition;
         endTransform = Vector2.zero;
+        Debug.Log($"rectTransform = {rectTransform.name} | startTransform = {startTransform} | endTransform = {endTransform}");
     }
 
     private void FixedUpdate()
-    { 
-        //Cursor.lockState = CursorLockMode.None;
+    {
         if (drugStarted)
         {
             actionOnDraging?.Invoke();
         }
-
-        //second try, but not working
-        //if (Input.touchCount > 0)
-        //{
-        //    Touch touch = Input.GetTouch(0);
-
-        //    // obtain touch position
-        //    Vector2 touchPos = Camera.main.ScreenToWorldPoint(touch.position);
-
-        //    // get touch to take a deal with
-        //    switch (touch.phase)
-        //    {
-        //        // if you touches the screen
-        //        case TouchPhase.Began:
-        //            OnBeginDragFunction();
-        //            break;
-
-        //        // you move your finger
-        //        case TouchPhase.Moved:
-        //            OnDragFunction(touchPos);
-        //            break;
-
-        //        // you release your finger
-        //        case TouchPhase.Ended:
-        //            OnEndDragFunction();
-        //            break;
-        //    }
-        //}
+        
     }
 
     #endregion Unity functions
@@ -131,48 +99,43 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         rectTransform.anchoredPosition = startTransform;
         actionOnEndDrug?.Invoke();
         drugStarted = false;
-        text.text = rectTransform.anchoredPosition.ToString();
     }
 
     public void OnBeginDragFunction()
     {
         drugStarted = true;
         actionOnStartDrug?.Invoke();
-        text.text = rectTransform.anchoredPosition.ToString();
     }
 
-    public void OnDragFunction()
-    {
-        //not working
-        //Cursor.lockState = CursorLockMode.None;
-        //Cursor.visible = true;
-        if (Input.touchCount > 0)
-        {
-            Touch touch = Input.GetTouch(0);
-            if (!(Camera.main is null))
-            {
-                Vector2 touchPos = Camera.main.ScreenToWorldPoint(touch.position);
-                rectTransform.anchoredPosition += touchPos;
-            }
-        }
-
-        endTransform = rectTransform.anchoredPosition;
-        text.text = rectTransform.anchoredPosition.ToString();
-    }
+    // public void OnDragFunction()
+    // {
+    //     //not working
+    //     //Cursor.lockState = CursorLockMode.None;
+    //     //Cursor.visible = true;
+    //     if (Input.touchCount > 0)
+    //     {
+    //         Touch touch = Input.GetTouch(0);
+    //         if (!(Camera.main is null))
+    //         {
+    //             Vector2 touchPos = Camera.main.ScreenToWorldPoint(touch.position);
+    //             rectTransform.anchoredPosition += touchPos;
+    //         }
+    //     }
+    //
+    //     endTransform = rectTransform.anchoredPosition;
+    // }
 
     public void OnDragFunction(PointerEventData eventData)
     {
         rectTransform.anchoredPosition += eventData.delta;
         endTransform = rectTransform.anchoredPosition;
-        text.text = eventData.delta.ToString();
     }
 
-    public void OnDragFunction(Vector2 pos)
-    {
-        rectTransform.anchoredPosition += pos;
-        endTransform = rectTransform.anchoredPosition;
-        text.text = rectTransform.anchoredPosition.ToString();
-    }
+    // public void OnDragFunction(Vector2 pos)
+    // {
+    //     rectTransform.anchoredPosition += pos;
+    //     endTransform = rectTransform.anchoredPosition;
+    // }
 
     #endregion public functions
 
@@ -211,7 +174,7 @@ public class DrugDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
         {
             callbackOnDoublejump = false;
         }
-        text.text = rectTransform.anchoredPosition.ToString();
+        //text.text = rectTransform.anchoredPosition.ToString();
     }
 
     void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)

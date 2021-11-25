@@ -31,14 +31,7 @@ public class AnimatorController : MonoBehaviour
 
     public void ChangeAnimatorState()
     {
-        if (!value)
-        {
-            value = true;
-        }
-        else
-        {
-            value = false;
-        }
+        value = !value;
         animator.SetBool("isWalking", value);
         Debug.Log("I'm clicked");
     }

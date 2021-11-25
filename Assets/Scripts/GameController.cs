@@ -71,6 +71,7 @@ public class GameController : MonoBehaviour
         {
             SetActionsToObjects();
         }
+        Debug.Log($"movement = {movement.enabled} | animatorController = {animatorController.enabled} | collisionChecker = {collisionChecker.enabled} | particles ={particles.gameObject} | progresSaver = {progresSaver.enabled}");
     }
 
     private void SetActionsToObjects()

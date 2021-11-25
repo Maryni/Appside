@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +10,7 @@ public class Movement : MonoBehaviour
 
 #pragma warning disable
     [SerializeField] private float modSpeed;
-    [SerializeField] private Text text;
+    //[SerializeField] private Text text;
 #pragma warning restore
 
     #endregion Inspector variables
@@ -29,18 +30,6 @@ public class Movement : MonoBehaviour
 
     #region Unity functions
 
-    private void OnValidate()
-    {
-        if (player == null)
-        {
-            player = gameObject;
-        }
-        if (rig == null)
-        {
-            rig = player.GetComponent<Rigidbody>();
-        }
-    }
-
     #endregion Unity functions
 
     #region public functions
@@ -49,18 +38,24 @@ public class Movement : MonoBehaviour
     {
         this.drugDrop = drugDrop;
         startPos = drugDrop.GetStartPosition();
+        if (player == null)
+        {
+            player = gameObject;
+        }
+        if (rig == null)
+        {
+            rig = player.GetComponent<Rigidbody>();
+        } 
     }
 
     public void Move()
     {
         if (drugDrop != null)
         {
-            //text.text = "" + startPos + "|" + endPos;
             GetPosition();
             if (Input.GetMouseButton(0) || Input.touchCount > 0)
             {
                 direction = new Vector3(endPos.x - startPos.x, 0, endPos.y - startPos.y).normalized;
-                //text.text = "" + startPos + "|" + endPos;
                 RotateOnDirection();
                 rig.velocity = direction * modSpeed;
                 direction = Vector2.zero;
